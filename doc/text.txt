@@ -12,6 +12,18 @@ function Test-SingleInstance {
     }
 }
 
+$code = @"
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+"@
+$winApi = Add-Type -MemberDefinition $code -Name "Win32ShowWindow" -Namespace "Win32Functions" -PassThru
+$hwnd = (Get-Process -Id $PID).MainWindowHandle
+if ($hwnd -ne [System.IntPtr]::Zero) {
+    $winApi::ShowWindow($hwnd, 0)
+}
+
+Start-Process "msedge.exe" -ArgumentList "https://arxiv.org/pdf/$tyrp"
+
 $instanceCheck = Test-SingleInstance -MutexName "Git_RUNNING"
 
 if (-not $instanceCheck.Acquired) {
