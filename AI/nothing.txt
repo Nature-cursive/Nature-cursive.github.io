@@ -1,1 +1,5 @@
-Fuck off Man
+for ($i = 1; $i -le 10; $i++) {
+    Write-Host "Current number: $i"
+    Write-Host "Starting 30 seconds sleep"
+    start-sleep -seconds 30
+}
