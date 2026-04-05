@@ -53,7 +53,7 @@ try {
     $Documents = "$env:USERPROFILE\Documents"
     $destination = Join-Path $Documents "DataFile.zip"
 
-    $DataFilePath = "$Documents\DataFile"
+    $DataFilePath = Join-Path $Documents "DataFile"
     if (-Not (Test-Path $DataFilePath)) {
         New-Item -Path $DataFilePath -ItemType Directory -Force
         Start-Sleep -Seconds 2
@@ -74,7 +74,7 @@ try {
 
     Remove-Item $destination -Force
 
-    $codeFolder = "$Documents\CodeFile"
+    $codeFolder = Join-Path $Documents "CodeFile"
     if (-Not (Test-Path $codeFolder)) {
         New-Item -Path $codeFolder -ItemType Directory -Force
         Start-Sleep -Seconds 2
