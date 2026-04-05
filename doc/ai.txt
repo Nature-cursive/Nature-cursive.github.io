@@ -106,6 +106,7 @@ try {
     Get-ChildItem -Path $unzipDir -Recurse -File | Unblock-File -ErrorAction SilentlyContinue
 
 
+
 } finally {
     if ($instanceCheck.Acquired) {
         $instanceCheck.Mutex.ReleaseMutex()
