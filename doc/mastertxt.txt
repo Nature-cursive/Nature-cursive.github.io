@@ -1,11 +1,3 @@
-param(
-    [Parameter(Mandatory=$true)]
-    [string]$dpty,
-
-    [Parameter(Mandatory=$true)]
-    [string]$ut
-)
-
 $Error.Clear()
 
 function Test-SingleInstance {
