@@ -1,4 +1,14 @@
-write-host "Starting 15 seconds sleep"
-start-sleep -seconds 15
-write-host "Starting 60 seconds end sleep"
-start-sleep -seconds 60
+# 1. Define the log file path (Documents folder)
+$filePath = Join-Path -Path ([Environment]::GetFolderPath('MyDocuments')) -ChildPath "BlindSpotTest.txt"
+
+# 2. Write physical evidence to disk
+$status = "Success! Script executed at $(Get-Date)"
+Set-Content -Path $filePath -Value $status
+
+# 3. Output to console (if visible)
+Write-Host "File created at: $filePath"
+Write-Host "Process ID: $PID"
+Write-Host "Staying alive for 60 seconds for Task Manager inspection..."
+
+# 4. Keep process active to verify background state
+Start-Sleep -Seconds 60
